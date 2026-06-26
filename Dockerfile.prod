@@ -1,0 +1,38 @@
+# --- Stage 1: Build the Inertia / Vue Frontend ---
+FROM node:20-alpine AS frontend-builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+# --- Stage 2: Clean Production PHP 8.5 Environment ---
+FROM php:8.5-fpm-alpine
+
+# Install standard production web servers & extension dependencies
+RUN apk add --no-cache nginx supervisor mariadb-client
+RUN docker-php-ext-install pdo pdo_mysql
+
+WORKDIR /var/www
+
+# Copy the core code over
+COPY . .
+
+# Inject the compiled assets from Stage 1 into the public directory
+COPY --from=frontend-builder /app/public/build ./public/build
+
+# Install clean production dependencies (skipping dev/testing libraries)
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN composer install --no-dev --optimize-autoloader
+RUN mkdir -p /run/nginx
+
+# Set permissions for production storage writing
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+
+# Copy our custom Nginx configuration
+COPY nginx.conf /etc/nginx/http.d/default.conf
+
+EXPOSE 80
+
+# Starts Nginx and PHP-FPM side by side safely
+CMD ["sh", "./docker-entrypoint.sh"]

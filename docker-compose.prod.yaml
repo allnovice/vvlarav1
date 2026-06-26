@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  # The actual production-built app
+  asset-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    restart: always
+    ports:
+      - "80:80" # Binds directly to port 80 so they just type cmms-nyc.com without a port number!
+    volumes:
+      - ./.env.production:/var/www/.env
+    depends_on:
+      - asset-db
+
+  # The production database matching your exact MariaDB version
+  asset-db:
+    image: 'mariadb:11'
+    restart: always
+    environment:
+      MYSQL_DATABASE: "${DB_DATABASE}"
+      MYSQL_USER: "${DB_USERNAME}"
+      MYSQL_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+    volumes:
+      - prod-mariadb:/var/lib/mysql
+
+volumes:
+  prod-mariadb:
+    driver: local

@@ -1,0 +1,76 @@
+<script setup>
+import { ref } from 'vue';
+import { Head } from '@inertiajs/vue3';
+import { Button } from '@/Components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/Components/ui/table';
+
+// Sample inventory data
+const assets = ref([
+  { id: 'AST-001', name: 'MacBook Pro 16"', category: 'Hardware', status: 'Assigned', location: 'HQ - Room 302' },
+  { id: 'AST-002', name: 'Dell UltraSharp 27"', category: 'Monitors', status: 'Available', location: 'Stockroom A' },
+  { id: 'AST-003', name: 'Logitech MX Master 3S', category: 'Peripherals', status: 'Available', location: 'Stockroom A' },
+  { id: 'AST-004', name: 'iPhone 15 Pro', category: 'Mobile', status: 'In Repair', location: 'External Service' },
+]);
+
+const handleAddAsset = () => {
+  alert('Add Asset button clicked! Next we can wire this up to open a form.');
+};
+</script>
+
+<template>
+  <Head title="Asset Management" />
+
+  <div class="min-h-screen bg-neutral-50 p-8">
+    <div class="max-w-6xl mx-auto space-y-6">
+      
+      <div class="flex items-center justify-between border-b pb-5">
+        <div>
+          <h1 class="text-3xl font-bold tracking-tight text-neutral-900">Asset Management</h1>
+          <p class="text-sm text-neutral-500 mt-1">Track company hardware, software, and peripheral assignments.</p>
+        </div>
+        <Button @click="handleAddAsset" variant="default">
+          + Add New Asset
+        </Button>
+      </div>
+
+      <div class="bg-white rounded-md border shadow-sm overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead class="w-[120px]">Asset ID</TableHead>
+              <TableHead>Asset Name</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Location</TableHead>
+              <TableHead class="text-right">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow v-for="asset in assets" :key="asset.id">
+              <TableCell class="font-medium text-neutral-700">{{ asset.id }}</TableCell>
+              <TableCell class="font-semibold text-neutral-900">{{ asset.name }}</TableCell>
+              <TableCell>{{ asset.category }}</TableCell>
+              <TableCell class="text-neutral-500">{{ asset.location }}</TableCell>
+              <TableCell class="text-right">
+                <span :class="[
+                  'inline-items px-2 py-1 rounded text-xs font-medium',
+                  asset.status === 'Available' ? 'bg-green-100 text-green-700' :
+                  asset.status === 'Assigned' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'
+                ]">
+                  {{ asset.status }}
+                </span>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </div>
+
+    </div>
+  </div>
+</template>
